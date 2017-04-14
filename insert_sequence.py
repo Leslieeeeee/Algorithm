@@ -9,7 +9,7 @@ n = 0
 k = 0
 j = 0
 #快排
-len = a.length()
+lens = len(a)
 while n < len:
 for i in a:
 	if a[n] < a[n+1]:
@@ -20,7 +20,7 @@ for i in a:
 		a[n+1] = max
 	i++
 #插入
-len = b.length()
+lens = len(b)
 while n < len:
 	for i in b:
 		for j in len:
