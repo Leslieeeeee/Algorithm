@@ -29,7 +29,7 @@ struct{  //顺序表（顺序结构）的定义
 
 /*-----page 19 on textbook ---------*/
 
-
+//创建空链表
 status IntiaList(SqList *L){
     L->elem = (ElemType *)malloc( LIST_INIT_SIZE * sizeof (ElemType));
     if(!L->elem) exit(OVERFLOW);
@@ -38,6 +38,7 @@ status IntiaList(SqList *L){
     return OK;
 }
 
+//销毁链表
 status DestroyList(SqList *L){
 
     if(L->elem) free(L->elem); //释放线性表的存储空间
@@ -46,13 +47,15 @@ status DestroyList(SqList *L){
     L->listsize = 0;
     return OK;
 }
+
+//清空链表
 status ClearList(SqList *L){
 
     L->length = 0;
     return OK;
 
 }
-
+//判断链表是否为空
 status ListEmpty(SqList *L){
 
     if(L->length == 0)return TRUE;
@@ -66,6 +69,7 @@ int ListLength(SqList *L){
 
 }
 
+//提取链表中的元素
 status GetElem(SqList *L,int i,ElemType *e){
 
     if(i >= 0 || i <= L->length){
@@ -76,15 +80,15 @@ status GetElem(SqList *L,int i,ElemType *e){
     return FALSE;
 
 }
-
-status LocateElem(SqList *L,ElemType e){
+//找到元素对应的位置
+status LocateElem(SqList *L,ElemType *e){
     int i;
     for(i = 0;i < L->length; i++);
-    if(e == L->elem[i]) printf("值为%d的元素，其位置为%d\n", e, i+1);
+    if(*e == L->elem[i]) printf("值为%d的元素，其位置为%d\n", *e, i+1);
     return OK;
 
 }
-
+//提取元素直接前驱
 status PriorElem(SqList *L,ElemType *cur,ElemType *pre_e){
 
     for(int i = 1;i < L->length; i++)
@@ -95,6 +99,7 @@ status PriorElem(SqList *L,ElemType *cur,ElemType *pre_e){
     return OK;
 }
 
+//提取元素直接后驱
 status NextElem(SqList *L,ElemType *cur,ElemType *next_e){
 
     for(int i = 1;i < L->length; i++)
@@ -105,14 +110,15 @@ status NextElem(SqList *L,ElemType *cur,ElemType *next_e){
     return OK;
 }
 
-
-status ListInsert(SqList *L,int i,ElemType e) {
+//插入元素
+status ListInsert(SqList *L,int i,ElemType *e) {
+    
     int l;
     if (i < 1 || i > L->length + 1) {
-        printf("输入i值超过范围，请重新输入\n");
+        return ERROR;
     }
 
-    if (L->length >= L->listsize) {
+    if (L->length >= L->listsize){
 
         ElemType *newbase = (ElemType *) realloc(L->elem, (L->listsize + LISTINCREMENT) * sizeof(ElemType));
         if (!newbase) {
@@ -120,34 +126,32 @@ status ListInsert(SqList *L,int i,ElemType e) {
         }
         L->elem = newbase;
         L->listsize += LISTINCREMENT;
-
-        for (int l = L->length; l >= i; --l)
-            L->elem[l + 1] = L->elem[l];
-            L->elem[l] = e;
-            ++L->length;
-
     }
+
+    for (l = L->length-1; l >= i-1; --l)
+        L->elem[l + 1] = L->elem[l];
+    L->elem[i-1] = *e;
+    ++L->length;
     return OK;
 }
 
+//删除元素
 status ListDelete(SqList *L, int i, ElemType *e){
-
+    
+    int l;
     if (i < 1 || i > L->length) {
         printf("输入i值超过范围，请重新输入\n");
     }
 
-    ElemType *q, *p;
-    p = &(L->elem[i-1]);
-
-    q = L->elem + L->length - 1;
-    for (++p; p <= q; ++p) {
-        *(p - 1) = *p;
-    }
+    for (l = i;l < L->length-1; l++)
+        L->elem[l-1] = L->elem[l];
+        i++;
     --L->length;
-    *q = e;
     return OK;
 
 }
+
+//返回全部元素
 status ListTrabverse(SqList L){
     int i;
     printf("\n-----------all elements -----------------------\n");
@@ -163,10 +167,10 @@ int main(void) {
     SqList L;
     int i;
     int op = 1;
-    ElemType *e;
-    ElemType *cur;
-    ElemType *next_e;
-    ElemType *pre_e;
+    ElemType e;
+    ElemType cur;
+    ElemType next_e;
+    ElemType pre_e;
 
     while (op) {
         system("cls");
@@ -220,8 +224,7 @@ int main(void) {
             case 6:
                 printf("请输入要查找的元素的序号：");
                 scanf("%d", &i);
-
-                if (GetElem(&L, i, &e) == OK) printf("线性表提取元素成功。\n");
+                if (GetElem(&L, i, &e) == OK) printf("线性表提取元素成功,元素为：%d\n", L.elem[i]);
                 else printf("线性表提取元素失败！\n");
                 getchar();
                 getchar();
@@ -256,10 +259,10 @@ int main(void) {
             case 10:
                 printf("请输入要插入的值：");
                 scanf("%d", &e);
-                printf("请输入你要插入的位置:");
+                printf("请输入你要插入的位置(必须从1开始）:");
                 scanf("%d", &i);
-                ListInsert(&L, &i, &e);
-                if (ListInsert(&L, &i, &e) == OK) printf("线性表插入成功！\n");
+                ListInsert(&L, i, &e);
+                if (ListInsert(&L, i, &e) == OK) printf("线性表插入成功！\n");
                 else printf("线性表插入失败！\n");
                 getchar();
                 getchar();
@@ -267,9 +270,8 @@ int main(void) {
             case 11:
                 printf("请输入要删除元素的序号：");
                 scanf("%d", &i);
-                int e;
-                ListDelete(&L, i, e);
-                if (ListDelete(&L, i, e) == OK) printf("线性表删除元素成功！\n");
+                ListDelete(&L, i, &e);
+                if (ListDelete(&L, i, &e) == OK) printf("线性表删除元素成功！\n");
                 else printf("线性表删除元素失败！\n");
                 getchar();
                 getchar();
